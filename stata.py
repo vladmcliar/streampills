@@ -3,54 +3,61 @@ import streamlit as st
 # Заголовок приложения
 st.title('Демо веб-приложения для сбора статы командами AI-Support.')
 st.markdown('Служит для автоматизированного подсчёта ЧИА, ЧИЗЗ, ЧИКЗ, метрик интент-аналитиков, СХ и разработчиков и отправки данных в DWH для того, чтобы наши отчёты по метрикам эффективности тянули')
-# Функция для отображения содержимого в теле приложения
-def display_content(content):
-    if content == 'Data task':
-        st.header('Data task')
-        st.write('Тут считаем метрики интент-аналитиков и профит')
-    elif content == 'Procedure':
-        st.header('Procedure')
-        st.write('Тут можно считать отвалы и подводит результаты аб')
-    elif content == 'Monitoring':
-        st.header('Monitoring')
-        st.write('Тут итоги мониторингов. Отправляем данные в DWH чтобы отчёты тянули это всё')
-
-# Левая панель с заголовком "Тип задач" и кнопками
-st.sidebar.title('Тип задач')
-if st.sidebar.button('Data task'):
-    display_content('Data task')
-if st.sidebar.button('Procedure'):
-    display_content('Procedure')
-if st.sidebar.button('Monitoring'):
-    display_content('Monitoring')
-
-# Тело приложения
-st.header('Ввод данных')
-
-# Добавление поля ввода для даты начала теста
-start_date = st.date_input('Дата начала теста')
-
-# Добавление поля ввода для даты окончания теста
-end_date = st.date_input('Дата окончания теста')
-
-# Добавление выпадающего списка для выбора ключа интента
-if 'Procedure' in st.session_state:
-    intent_key_label = 'Ключ процедуры'
-else:
-    intent_key_label = 'Ключ интента'
+st.write('Для начала работы выбери тип задачи слева')
 
 intent_key_options = ('Ключ 1', 'Ключ 2', 'Ключ 3') if 'Procedure' not in st.session_state else ('Ключ процедуры',)
-intent_key = st.selectbox(f'Выберите {intent_key_label}', intent_key_options)
+bl_options = ('Семейный банк', 'Кредитки','Дебетовки')
+channel_options = ('Желтое приложение', 'Мобайл', 'HR', 'SME', 'Invest')
 
-# Добавление поля ввода текста для ключа задачи в Jira
-jira_key = st.text_input('Введите ключ задачи в Jira')
+# Функция для отображения полей для ввода в зависимости от выбранной кнопки
+def display_input_fields(content):
+    if content == 'Data task':
+        st.title('Интент-аналитик')
+        ch_name = st.selectbox(f'Выберите канал', channel_options)
+        b_line = st.selectbox(f'Выберите бизнес-линию', bl_options)
+        start_date = st.date_input('Дата начала теста')
+        end_date = st.date_input('Дата окончания теста')
+        intent_key = st.selectbox(f'Выберите интент', intent_key_options)
+        jira_key = st.text_input('Введите ключ задачи в Jira')
+        send_data = st.button('Отправить данные')
+    elif content == 'Procedure':
+        st.title('Разработчик сценариев')
+        ch_name = st.selectbox(f'Выберите канал', channel_options)
+        b_line = st.selectbox(f'Выберите бизнес-лнию', bl_options)
+        proc_key_label = st.text_input(f'Введите ключ процедуры')
+        start_date = st.date_input('Дата начала теста')
+        end_date = st.date_input('Дата окончания теста')
+        send_data = st.button('Отправить данные')
+    elif content == 'Monitoring':
+        st.title('Аналитик клиентского опыта')
+        ch_name = st.selectbox(f'Выберите канал', channel_options)
+        b_line = st.selectbox(f'Выберите бизнес-лнию', bl_options)
+        start_date = st.date_input('Дата начала теста')
+        end_date = st.date_input('Дата окончания теста')
+        intent_key = st.selectbox(f'Выберите интент', intent_key_options)
+        proc_key_label = st.text_input(f'Введите ключ процедуры')
+        send_data = st.button('Отправить данные')
+    elif content == 'Admin':
+        st.title('Панель администратора')
+        st.write('Тут можно изменить коэффициенты ЧИА, ЧИКЗ, ЧИЗЗ')
+        b_line = st.selectbox(f'Выберите бизнес-лнию', bl_options)
+        kfc = st.text_input('Коэффициент')
+        send_data = st.button('Отправить данные')
 
-# Добавление кнопки
-button_clicked = st.button('Нажмите для отправки')
+# Левая панель с заголовком "Меню" и кнопками
+st.sidebar.title('Меню')
+selected_content = st.sidebar.button('Data task')
+if selected_content:
+    display_input_fields('Data task')
 
-# Если кнопка была нажата, отобразить сообщение с выбранными данными
-if button_clicked:
-    st.write('Дата начала теста:', start_date)
-    st.write('Дата окончания теста:', end_date)
-    st.write(f'{intent_key_label}:', intent_key)
-    st.write('Ключ задачи в Jira:', jira_key)
+selected_content = st.sidebar.button('Procedure')
+if selected_content:
+    display_input_fields('Procedure')
+
+selected_content = st.sidebar.button('Monitoring')
+if selected_content:
+    display_input_fields('Monitoring')
+
+selected_content = st.sidebar.button('Admin')
+if selected_content:
+    display_input_fields('Admin')
